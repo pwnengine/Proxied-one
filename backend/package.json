@@ -1,0 +1,27 @@
+{
+  "type": "module",
+  "name": "proxied_backend",
+  "version": "1.0.0",
+  "description": "Backend for Proxied project.",
+  "main": "/dist/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "tsc && nodemon dist/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.2"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7",
+    "playwright": "^1.48.1"
+  }
+}
