@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosResponse } from 'axios'
+import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios'
 import * as cheerio from 'cheerio'
 import { i_proxies, i_proxy } from './proxy-type.js'
 
@@ -7,7 +7,7 @@ interface i_scrape_data {
   res: AxiosResponse<any, any>;
 }
 
-const get_scrape_data: (url: string) => Promise<i_scrape_data> = async(url: string) => {
+const get_scrape_data: (url: string, method: 'GET' | 'POST', config?: AxiosRequestConfig<any>) => Promise<i_scrape_data> = async(url: string, method: 'GET' | 'POST', config?: AxiosRequestConfig) => {
   let proxies: i_proxies = {
     proxy: [],
     error: false,
@@ -19,7 +19,12 @@ const get_scrape_data: (url: string) => Promise<i_scrape_data> = async(url: stri
 
   try {
     console.log('trying to get ', url);
-    res = await axios.get(url);
+    if(method == 'GET') {
+      res = await axios.get(url);
+    } else if(method == 'POST') {
+      res = await axios.post(url, {}, config);
+    }
+    
   } catch(error) {
     proxies.error = true;
     proxies.status_code = 500;
@@ -31,7 +36,7 @@ const get_scrape_data: (url: string) => Promise<i_scrape_data> = async(url: stri
   return { proxies, res };
 };
 
-const scrape_spys: (url: string, amount: number, type: string) => Promise<i_proxies> = async(url, amount, type) => {
+const scrape_hide: (url: string, amount: number, type: string) => Promise<i_proxies> = async(url, amount, type) => {
   let scrape_data: i_scrape_data = 
   { 
     proxies: { 
@@ -40,31 +45,46 @@ const scrape_spys: (url: string, amount: number, type: string) => Promise<i_prox
     res: undefined,
   };
 
-  if(type === 'socks5') {
+  scrape_data = await get_scrape_data(`${url}/en/proxy-list/`, 'GET');
+  const $ = cheerio.load(String(scrape_data.res?.data));
 
-  } else if(type === 'https') {
+  const TD_START: number = 7;
+  const PORT_OFFSET: number = 1;
+  const PROXY_TYPE_OFFSET: number = 4;
+  for(let q: number = 7; q <= (amount * TD_START); q += TD_START) {
+    const grabbed_proxy: string = $('td', 'tr').eq(q).text();
+    const grabbed_port: number = Number($('td', 'tr').eq(q + PORT_OFFSET).text());
+    const grabbed_type: string = $('td', 'tr').eq(q + PROXY_TYPE_OFFSET).text();
 
-  } else { // default is http
-    scrape_data = await get_scrape_data(`${url}/en/http-proxy-list/`);
+    if(type === 'all') {
+      scrape_data.proxies.proxy.push({ type: grabbed_type, host: grabbed_proxy, port: grabbed_port });
+    } else if(grabbed_type.includes(type.toUpperCase())) {
+      scrape_data.proxies.proxy.push({ type: grabbed_type, host: grabbed_proxy, port: grabbed_port });
+    }
   }
-
-  console.log(`Proxies: ${scrape_data.proxies}\n\nAxios Response: ${scrape_data.res?.data}`);
-
-
+ 
   return scrape_data.proxies;
 };
 
 const get_proxies: (origin: string, ip: string, amount: number, type: string, source: string) => Promise<i_proxies> = async(origin, ip, amount, type, source) => {
   if(type !== 'http' && type !== 'https' && type !== 'socks5')
-    type = 'http'
+    type = 'all'
 
   console.log(`New (/get-proxies) request from ${origin} | ${ip}\namount: ${amount}\ntype: ${type}\nsource: ${source}\n\n\n\n\n`);
 
+  let proxies: i_proxies;
   switch(source) {
 
     default:
-      return await scrape_spys(`https://spys.one`, amount, type);
+      proxies = await scrape_hide(`https://hide.mn`, amount, type);
   }
+  
+  if(proxies.proxy.length < amount) {
+    proxies.error = true;
+    proxies.message = 'Could not scrape the amount of proxies specified.';
+  }
+
+  return proxies;
 };
 
 export default get_proxies;
