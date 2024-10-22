@@ -58,9 +58,9 @@ const scrape_hide: (url: string, amount: number, type: string) => Promise<i_prox
 
     if(type === 'all') {
       scrape_data.proxies.proxy.push({ type: grabbed_type, host: grabbed_proxy, port: grabbed_port });
-    } else if(grabbed_type.includes(type)) {
+    } else if(grabbed_type.includes(type.toUpperCase())) {
       scrape_data.proxies.proxy.push({ type: grabbed_type, host: grabbed_proxy, port: grabbed_port });
-    } 
+    }
   }
  
   return scrape_data.proxies;
@@ -72,11 +72,19 @@ const get_proxies: (origin: string, ip: string, amount: number, type: string, so
 
   console.log(`New (/get-proxies) request from ${origin} | ${ip}\namount: ${amount}\ntype: ${type}\nsource: ${source}\n\n\n\n\n`);
 
+  let proxies: i_proxies;
   switch(source) {
 
     default:
-      return await scrape_hide(`https://hide.mn`, amount, type);
+      proxies = await scrape_hide(`https://hide.mn`, amount, type);
   }
+  
+  if(proxies.proxy.length < amount) {
+    proxies.error = true;
+    proxies.message = 'Could not scrape the amount of proxies specified.';
+  }
+
+  return proxies;
 };
 
 export default get_proxies;
