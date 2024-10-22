@@ -19,6 +19,11 @@ const Container = styled.div`
     text-align: center;
 
   }
+
+  div {
+   
+    
+  }
 `;
 
 interface props {
