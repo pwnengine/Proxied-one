@@ -1,7 +1,9 @@
 import Code from "../components/Code";
 //import MainSection from "../components/MainSection"
 import styled from 'styled-components'
-import MainSection from "../components/MainSection";
+import MainSection from "../components/MainSection"
+import Button from '../components/Button'
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   position: absolute;
@@ -51,6 +53,8 @@ const Container = styled.div`
 
 
 const Home = () => {
+  const nav = useNavigate();
+
   return (
    <Container>
       
@@ -63,7 +67,9 @@ const Home = () => {
           Proxied.one is an easy to use proxy api that scapes the internet for proxies.
         </h4>
 
-        <button className="docs-btn">Documentation</button>
+        <div className="docs-btn">
+        <Button onclick={() => nav('/docs')} name="Documentation"/>
+        </div>
 
         <div className="code-container">
         <MainSection name="Try it youself!">

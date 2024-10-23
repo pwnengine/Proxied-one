@@ -3,6 +3,7 @@ import style from 'react-syntax-highlighter/dist/esm/styles/hljs/atelier-cave-da
 import styled from 'styled-components';
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { useState } from 'react';
+import { col_white } from '../colors';
 
 interface props {
   language: string;
@@ -20,9 +21,10 @@ const Container = styled.div`
     }
 
   }
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
 
   .copied-animation {
     text-align: center;
@@ -43,6 +45,7 @@ const Container = styled.div`
     margin: 0px;  
     border: none;
     font-weight: 550;
+    background-color: ${col_white};
   }
   button:hover {
     cursor: pointer;
@@ -54,6 +57,7 @@ const Container = styled.div`
     outline: none;
   }
 }
+  }
 
 `;
 
@@ -62,6 +66,7 @@ const Code = ({ language, code, title }: props) => {
 
   return (
     <Container>
+      <div>
       <div>
       <h3 className="title">{title}</h3>
       <button>
@@ -75,6 +80,7 @@ const Code = ({ language, code, title }: props) => {
       <SyntaxHighlighter customStyle={{backgroundColor: '#1c1b22', padding: '1rem', margin: '0', borderRadius: '5px'}} language={language} style={style} showLineNumbers={true}>
         {code}
       </SyntaxHighlighter>
+      </div>
     </Container>
   )
 }
