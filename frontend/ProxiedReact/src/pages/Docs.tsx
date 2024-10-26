@@ -1,5 +1,5 @@
 import Code from "../components/Code";
-import DocsPoint from "../components/DocsPoint";
+import SectionPoint from "../components/SectionPoint";
 import MainSection from "../components/MainSection"
 import styled from 'styled-components'
 
@@ -19,7 +19,7 @@ const Docs = () => {
     <Container>
       <MainSection name="Let's build something cool">
 
-      <DocsPoint title={'Features'}>
+      <SectionPoint title={'Features'}>
           <div>
             <p>
             With the Proxied API you can grab proxies programmatically with http requests.
@@ -32,9 +32,9 @@ const Docs = () => {
             <li>Try to scape a certain amount</li>
             </ul>
           </div>
-        </DocsPoint>
+        </SectionPoint>
       
-        <DocsPoint title={'API Keys'}>
+        <SectionPoint title={'API Keys'}>
           <div>
             <p>
             An API key is not a needed, but without one you are limited to grabbing <span style={ { display: 'inline', fontWeight: '600' } }>only 1</span> proxy per request;
@@ -47,22 +47,22 @@ const Docs = () => {
             You can purchase an API key through with a one-time payment of $5 dollars through the account section under API keys.
             </p>
           </div>
-        </DocsPoint>
+        </SectionPoint>
 
-        <DocsPoint title={'Grab With Curl'}>
+        <SectionPoint title={'Grab With Curl'}>
           <div>
             <p>
             It can be as simple as a curl request.
             </p>
           </div>
           <Code language="curl" code="curl https://api.proxied.one/get-proxies?format=text&amount=1&type=http" title="" />
-        </DocsPoint>
+        </SectionPoint>
 
-        <DocsPoint title={'Or Javascript'}>
+        <SectionPoint title={'Or Javascript'}>
           <Code language="javascript" code="fetch('https://api.proxied.one/get-proxies?format=json&type=http')" title="" />
-        </DocsPoint>
+        </SectionPoint>
 
-        <DocsPoint title={'Customizing Your Query'}>
+        <SectionPoint title={'Customizing Your Query'}>
           <div>
             <p>Let's customize the query to get exactly what you want!</p>
           </div>
@@ -97,7 +97,7 @@ const Docs = () => {
 contents = urllib.request.urlopen('https://api.proxied.one/get-proxies?apikey=myapikey&format=text&amount=3&type=all').read()
 print(contents)"
             />
-        </DocsPoint>
+        </SectionPoint>
 
       </MainSection>
     </Container>

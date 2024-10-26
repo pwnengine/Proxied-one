@@ -14,7 +14,7 @@ const Container = styled.div`
 
   button:hover {
     outline: none;
-    padding: 0.505rem;
+    padding: 0.55rem;
     cursor: pointer;
   }
 

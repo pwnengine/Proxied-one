@@ -4,6 +4,7 @@ import { VscAccount } from "react-icons/vsc";
 import { VscKey } from "react-icons/vsc"
 import { VscPersonAdd } from "react-icons/vsc"
 import { CiMoneyCheck1 } from "react-icons/ci"
+import React from 'react'
 
 const Container = styled.div`
   
@@ -44,25 +45,35 @@ const Container = styled.div`
   
 `;
 
-const AccountNav = () => {
+interface props {
+  nav_array: React.RefObject<HTMLDivElement>[];
+}
+
+const AccountNav = ({ nav_array }: props) => {
+  const on_nav = (ref: React.RefObject<HTMLDivElement>) => {
+    if(ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   return (
     <Container>
-      <div className="option">
+      <div className="option" onClick={() => on_nav(nav_array[0])}>
         <VscAccount size={25} />
         <p>Account</p>
       </div>
 
-      <div className="option">
+      <div className="option" onClick={() => on_nav(nav_array[1])}>
         <VscKey size={25} />
         <p>API Key</p>
       </div>
 
-      <div className="option">
+      <div className="option" onClick={() => on_nav(nav_array[2])}>
         <VscPersonAdd size={25} />
-        <p>Referals</p>
+        <p>Referrals</p>
       </div>
 
-      <div className="option">
+      <div className="option" onClick={() => on_nav(nav_array[3])}>
         <CiMoneyCheck1 size={25} />
         <p>Billing</p>
       </div>
