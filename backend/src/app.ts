@@ -1,6 +1,7 @@
 import express from 'express'
 import get_proxies from './scraper.js'
 import { check_token } from './auth.js'
+import { check_proxy } from './check_proxy.js'
 
 const MAX_AMOUNT: number = 20;
 
@@ -9,6 +10,10 @@ const app = express();
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
+});
+
+app.get('/check-proxy', async(req, res) => {
+  res.json((await check_proxy(String(req.query?.ip))));
 });
 
 app.get('/get-proxies', async(req, res) => {
