@@ -2,6 +2,14 @@ import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios'
 import * as cheerio from 'cheerio'
 import { i_proxies, i_proxy } from './proxy-type.js'
 
+export interface i_custom_data {
+  full_url: string;
+  first_proxy_position: number;
+  next_proxy_position_offset: number;
+  port_offset: number;
+  type_offset: number;
+}
+
 interface i_scrape_data {
   proxies: i_proxies;
   res: AxiosResponse<any, any>;
@@ -52,7 +60,7 @@ const scrape: (url: string, amount: number, type: string, starting_proxy_positio
   const TD_NEXT_START: number = next_starting_proxy_offset;
   const PORT_OFFSET: number = port_offset;
   const PROXY_TYPE_OFFSET: number = type_offset;
-  for(let q: number = TD_START; q < (amount * TD_NEXT_START); q += TD_NEXT_START) {
+  for(let q: number = TD_START; q <= (amount * TD_NEXT_START); q += TD_NEXT_START) {
     const grabbed_proxy: string = $('td', 'tr').eq(q).text().trim();
     const grabbed_port: number = Number($('td', 'tr').eq(q + PORT_OFFSET).text());
     const grabbed_type: string = $('td', 'tr').eq(q + PROXY_TYPE_OFFSET).text().trim();
@@ -69,7 +77,7 @@ const scrape: (url: string, amount: number, type: string, starting_proxy_positio
   return scrape_data.proxies;
 };
 
-const get_proxies: (origin: string, ip: string, amount: number, type: string, source: string) => Promise<i_proxies> = async(origin, ip, amount, type, source) => {
+const get_proxies: (origin: string, ip: string, amount: number, type: string, source: string, custom?: i_custom_data) => Promise<i_proxies> = async(origin, ip, amount, type, source, custom) => {
   if(type !== 'http' && type !== 'https' && type !== 'socks5' && type !== 'socks4')
     type = 'all'
 
@@ -77,12 +85,17 @@ const get_proxies: (origin: string, ip: string, amount: number, type: string, so
 
   let proxies: i_proxies;
   switch(source) {
+    case 'custom':
+      proxies = await scrape(custom?.full_url, amount, type, custom?.first_proxy_position, custom?.next_proxy_position_offset, custom?.port_offset, custom?.type_offset);
+      break;
+
     case 'freeproxy.world':
       proxies = await scrape(`https://www.${source}/`, amount, type, 0, 8, 1, 5);
       break;
 
     case 'hide.mn':
       proxies = await scrape(`https://${source}/en/proxy-list/`, amount, type, 7, 7, 1, 4);
+      break;
 
     default:
       proxies = { proxy: [], error: true, status_code: 400, message: `source: ${source}, does not exist.` }
@@ -90,7 +103,7 @@ const get_proxies: (origin: string, ip: string, amount: number, type: string, so
   
   if(proxies.proxy.length < amount) {
     proxies.error = true;
-    proxies.message = 'Could not scrape the amount of proxies specified.';
+    proxies.message += ' Could not scrape the amount of proxies specified.';
   }
 
   return proxies;
