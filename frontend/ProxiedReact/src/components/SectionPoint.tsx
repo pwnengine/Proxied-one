@@ -18,7 +18,7 @@ interface props {
   title: string;
 }
 
-const DocsPoint = ({ children, title }: props) => {
+const SectionPoint = ({ children, title }: props) => {
   return (
     <Container>
       <div>
@@ -29,4 +29,4 @@ const DocsPoint = ({ children, title }: props) => {
   )
 }
 
-export default DocsPoint
+export default SectionPoint
