@@ -3,9 +3,13 @@ import MainSection from '../components/MainSection'
 import AccountNav from '../components/AccountNav'
 import { useWindowSize } from '../hooks/useWindowSize'
 import SectionPoint from '../components/SectionPoint'
-import { useRef } from 'react'
+import { useEffect, useRef, useState} from 'react'
+import axios from 'axios'
 import Input from '../components/Input'
 import Button from '../components/Button'
+import InfoPopup from '../components/InfoPopup'
+import { useNavigate } from 'react-router-dom'
+import { i_user, useUserQuery } from '../hooks/useUserQuery'
 
 const Container = styled.div`
   .nav {
@@ -66,25 +70,51 @@ const Account = () => {
   const referrals_ref = useRef<HTMLDivElement>(null);
   const billing_ref = useRef<HTMLDivElement>(null);
 
-  const username_input = useRef<string>('this is a username');
-  const password_input = useRef<string>('this is a password');
+  const username_input = useRef<string>('username');
+  const password_input = useRef<string>('password');
 
   const api_key_input = useRef<string>('api key');
 
+  const [show_bitcoin_wallet_popup, set_show_bitcoin_wallet_popup] = useState<boolean>(false);
+
+  const update_user_details = () => {
+    axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/user`, { new_username: username_input.current, new_password: password_input.current }, {withCredentials: true});
+  };
+
+  const fetch_user = (): Promise<i_user> => {
+    return axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/user`, {}, {withCredentials: true}).then((res) => {
+      return res.data
+    });
+  };
+
+  const { user, error, loading, refetch } = useUserQuery(fetch_user);
+
+  const nav = useNavigate();
+  useEffect(() => {
+    if(!loading && (user?.id === undefined || user?.id === undefined)) {
+      nav('/login');
+      console.error('not authenticated.');
+    }
+  }, [user, nav, loading]);
+  /*
+  
+
+  console.log(data);
+*/
   return (
     <Container>
 
       <div className={ x > 600 ? (x < 1250 ? 'nav small-nav' : 'nav') : ('nav nav-smaller')}>
         <AccountNav nav_array={ [ account_ref, apikey_ref, referrals_ref, billing_ref ] } />
       </div>
-
+      { !loading &&
       <div className={ x > 600 ? (x < 1250 ? 'page small-page' : 'page') : ('page page-smaller')}>
         <MainSection name={'Settings'}>
             <SectionPoint title="Account Details">
               <div ref={account_ref} className="page-point">
-              <Input name="Username" value={username_input} editable={true} />
-              <Input name="Password" value={password_input} editable={true} />
-              <Button name="Update" />
+              <Input name="Username" placeholder={user?.username} value={username_input} editable={true} />
+              <Input name="Password" placeholder={'*********'} value={password_input} editable={true} />
+              <Button name="Update" onclick={update_user_details} />
               </div>
             </SectionPoint>
               
@@ -105,17 +135,24 @@ const Account = () => {
               <div ref={billing_ref} className="page-point">
                 <div>
                   Payments can be made with Bitcoin to activate your account.<br /> 
-                  Once the transaction is verified (usually less than one hour) you will automatically be able to generate API keys.
-                  
+                  Once the transaction is verified (usually less than one hour) you will automatically be able to generate API keys. <br />
+                  The USD price is $10 for lifetime api use.
                   
                 </div>
+                <Button name="Pay with Bitcoin" onclick={() => set_show_bitcoin_wallet_popup(true)} />
               </div>
             </SectionPoint>
         </MainSection>
-      </div>
+      </div>}
       
         
-
+      { show_bitcoin_wallet_popup && 
+        <InfoPopup width="500px" height="500px" title="Bitcoin Wallet" on_close={() => set_show_bitcoin_wallet_popup(false)}> 
+          <div>
+            A bitcoin address has been create for this transaction. <br /> Please Send exactly 
+          </div>
+        </InfoPopup>
+      }
     </Container>
   )
 }

@@ -13,14 +13,24 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/bitcore-lib": "^0.15.6",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.9.0",
+    "dotenv": "^16.4.5",
     "typescript": "^5.2.2",
     "vite": "^5.0.2"
   },
   "dependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.0",
+    "bcrypt": "^5.1.1",
+    "bitcore-lib": "^10.5.3",
+    "connect-pg-simple": "^10.0.0",
     "express": "^4.21.1",
-    "nodemon": "^3.1.7"
+    "express-session": "^1.18.1",
+    "nodemon": "^3.1.7",
+    "postgres": "^3.4.5",
+    "react-query": "^3.39.3"
   }
 }

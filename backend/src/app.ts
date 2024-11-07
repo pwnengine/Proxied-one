@@ -1,16 +1,87 @@
 import express from 'express'
+import session from 'express-session'
 import get_proxies, { i_custom_data } from './scraper.js'
 import { check_token } from './auth.js'
 import { check_proxy } from './check_proxy.js'
+import bitcore from 'bitcore-lib'
+import { create_wallet, i_wallet } from './bitcoin/wallet.js'
+import sql from './db.js'
+import dotenv from 'dotenv'
+import genFunc from 'connect-pg-simple'
+import * as bcrypt from 'bcrypt'
+
+const SALT_ROUND = 10;
+
+declare module 'express-session' {
+  interface SessionData {
+    user: {
+      id: number;
+      username: string;
+    };
+  }
+}
+
+dotenv.config();
+
+await sql`
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255),
+    password VARCHAR(255),
+    wallet TEXT,
+    api_access BOOLEAN
+  )
+`;
+
+await sql`
+  CREATE TABLE IF NOT EXISTS apikeys (
+    id SERIAL PRIMARY KEY,
+    key TEXT
+  )
+`;
 
 const MAX_AMOUNT: number = 20;
 
 const app = express();
 
+app.use(express.json());
+
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  if(req.method === 'GET') { // anyone can make simple requests to the api
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+  } else {                     // change this later so that only the website can make preflight requests...
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    if(req.method === 'OPTIONS') {
+      res.status(200);
+      res.statusMessage = 'ok';
+      res.end();
+      return;
+    }
+  }
+
   next();
 });
+
+const pg_store = genFunc(session);
+const session_store = new pg_store({
+  conString: `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_ADDRESS}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+});
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  store: session_store,
+  cookie: {
+    secure: false,
+  }
+ })
+);
 
 app.get('/check-proxy', async(req, res) => {
   res.json((await check_proxy(String(req.query?.ip))));
@@ -38,7 +109,6 @@ app.get('/get-proxies', async(req, res) => {
     req_amount = MAX_AMOUNT;
   }
   
-
   // grab the proxies now that we have everything and send as json or text
   if(req.query?.format === 'text') {
     const proxies = await get_proxies(req.header('Origin'), req.ip, req_amount, req_type, req_source, custom_data);
@@ -50,6 +120,103 @@ app.get('/get-proxies', async(req, res) => {
   } else {
     res.json((await get_proxies(req.header('Origin'), req.ip, req_amount, req_type, req_source, custom_data)));
   }
+});
+
+app.post('/user', async(req, res) => {
+  if(req.session.user?.id && req.session.user?.username) {
+    console.log(req.session?.user);
+    res.json(req.session?.user);
+
+    if(req.body?.new_username) {
+      await sql`UPDATE users SET username = ${req.body?.new_username} WHERE id = ${req.session.user?.id}`;
+      req.session.user.username = req.body?.new_username;
+      req.session.save();
+    }
+    if(req.body?.new_password) {
+      bcrypt.hash(req.body?.new_password, SALT_ROUND, async(error, hash) => {
+        await sql`UPDATE users SET password = ${hash} WHERE id = ${req.session.user?.id}`;  
+      });
+      
+    }
+
+    res.status(200);
+  } else {
+    res.status(401);
+  }
+});
+
+app.post('/signup', async(req, res) => {
+  if(req.body?.username === undefined || req.body?.password === undefined) {
+    res.json({ login: false, status: 401, username: req.body?.username, password: req.body?.password });
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  const user_exists = await sql`
+    SELECT * FROM users WHERE username = ${req.body?.username}
+  `;
+
+  if(user_exists.length > 0) {
+    res.json({ login: false, status: 401, username: req.body?.username, password: req.body?.password });
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  await bcrypt.hash(req.body?.password, SALT_ROUND, async(error, hash) => {
+    const new_wallet: i_wallet = create_wallet();
+    await sql`
+      INSERT INTO users (username, password, wallet, api_access)
+      VALUES(${String(req.body?.username)}, ${hash}, ${new_wallet.address + ':' + new_wallet.private_key}, false)
+    `;
+
+    const auth = await sql`
+      SELECT * FROM users WHERE username = ${String(req.body?.username)}
+    `;
+  
+    req.session.user = {
+      id: Number(auth[0].id), 
+      username: String(auth[0].username),
+    }
+    req.session.save();
+
+    res.status(200);
+    res.json({login: true, status: 200, username: req.session.user?.username, id: req.session.user?.username});
+  });
+});
+
+app.post('/login', async(req, res) => { 
+  if(req.body?.username === undefined || req.body?.password === undefined) {
+    res.json({ login: false, status: 401, username: req.body?.username, password: req.body?.password });
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  const auth = await sql`
+    SELECT * FROM users WHERE username = ${req.body?.username}
+  `;
+
+  if(auth.length < 1 || !(await bcrypt.compare(req.body?.password, auth[0].password))) {
+    res.json({ login: false, status: 401, username: req.body?.username, password: req.body?.password });
+    res.end();
+    return;
+  }
+
+  req.session.user = {
+    id: Number(auth[0]?.id), 
+    username: String(auth[0]?.username),
+  };
+
+  req.session.save();
+
+  res.status(200);
+  res.json({login: true, status: 200, username: req.session.user?.username, id: req.session.user?.username});
+});
+
+app.post('/checkbalance', (req, res) => {
+
 });
 
 app.listen(8080, () => {

@@ -20,17 +20,18 @@ const Container = styled.div`
 
 interface props {
   name: string;
+  placeholder?: string;
   styled?: CSSProperties;
   value: React.MutableRefObject<string>;
   editable: boolean;
 }
 
-const Input = ({ name, styled, value, editable }: props) => {
+const Input = ({ placeholder, name, styled, value, editable }: props) => {
   return (
     <Container>
       <p>{name}</p>
-      { editable ? <input placeholder={value.current} style={styled} onChange={(e) => value.current = e.currentTarget.value} /> :
-        <input value={value.current} style={styled} />
+      { editable ? <input placeholder={placeholder} style={styled} onChange={(e) => value.current = e.currentTarget.value} /> :
+        <input value={value.current} style={styled} readOnly={true} />
       }
     </Container>
   )
