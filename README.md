@@ -15,3 +15,10 @@ Just grab the branch and keep in mind it contains the frontend for the project w
 2. Start the server ```npm run dev```
 
 Now you have a local server running on port ```8080```.
+
+## Documentation
+
+Grabbing proxies is as simple as making a ```GET``` request to the server at the ```get-proxies``` endpoint with your query parameters.
+The only required parameter is the source you want to scrape. An example is ```hide.mn``` so if you make a get request to ```http://localhost:8080/get-proxies?source=hide.mn```
+you'll get a response with a proxy in JSON format by default.
+
