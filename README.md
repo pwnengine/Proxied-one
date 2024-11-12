@@ -19,6 +19,34 @@ Now you have a local server running on port ```8080```.
 ## Documentation
 
 Grabbing proxies is as simple as making a ```GET``` request to the server at the ```get-proxies``` endpoint with your query parameters.
-The only required parameter is the source you want to scrape. An example is ```hide.mn``` so if you make a get request to ```http://localhost:8080/get-proxies?source=hide.mn```
+The only required parameter is the source you want to scrape. 
+An example is ```hide.mn``` so if you make a get request to ```http://localhost:8080/get-proxies?source=hide.mn```
 you'll get a response with a proxy in JSON format by default.
+
+The sources availble:
+1. ```freeproxy.world```
+Scrapes from [http](https://www.freeproxy.world/)
+
+2. hide.mn
+Scrapes from [http](//hide.mn/en/)
+
+4. custom
+Requires addition query parameters, but allows you to scrapes from any site that contains proxy data inside of it's HTML body in a ````<tr>```` -> ```<td>``` tag(s)
+![screenshots-11](https://github.com/user-attachments/assets/8675d9fc-dc80-41df-8768-0ae50e8d3a9b)
+The addition query parameters for custom scraping are:
+- ```url```
+  The full url of the target you wish to scrape.
+- ```first_proxy_position```
+  The first appearing proxy ip address ```<td>``` tag if you were to count them all.
+- ```next_proxy_position_offset```
+  The offset between proxy ip address ```<td>``` tags.
+- ```port_offset```
+  The offset between the ip address ```<td>``` tag and port ```<td>``` tag.
+- ```type_offset```
+  The offset between the ip address <td> tag and proxy type (i.e. HTTP) ```<td>``` tag.
+### Example: ```http://localhost:8080/get-proxies?source=custom&url=https://hide.mn/en/proxy-list/&first_proxy_position=7&next_proxy_position_offset=7&port_offset=1&type_offset=4```
+### Check the image above to see how the offsets translate to the html body code.
+
+
+
 
