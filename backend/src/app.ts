@@ -4,11 +4,12 @@ import get_proxies, { i_custom_data } from './scraper.js'
 import { check_token } from './auth.js'
 import { check_proxy } from './check_proxy.js'
 import bitcore from 'bitcore-lib'
-import { create_wallet, i_wallet } from './bitcoin/wallet.js'
+import { check_balance, create_wallet, i_wallet, usd_to_btc } from './bitcoin/wallet.js'
 import sql from './db.js'
 import dotenv from 'dotenv'
 import genFunc from 'connect-pg-simple'
 import * as bcrypt from 'bcrypt'
+import crypto from 'crypto'
 
 const SALT_ROUND = 10;
 
@@ -17,6 +18,7 @@ declare module 'express-session' {
     user: {
       id: number;
       username: string;
+      apikey: string;
     };
   }
 }
@@ -36,7 +38,9 @@ await sql`
 await sql`
   CREATE TABLE IF NOT EXISTS apikeys (
     id SERIAL PRIMARY KEY,
-    key TEXT
+    key TEXT,
+    uid INT, 
+    CONSTRAINT fk_uid FOREIGN KEY (uid) REFERENCES users (id)
   )
 `;
 
@@ -103,7 +107,7 @@ app.get('/get-proxies', async(req, res) => {
     }
   } 
   // check if we have a valid api key, if no then only allow for one proxy to be sent back.
-  if(req.query.apikey === undefined || !check_token()) {
+  if(req.query.apikey === undefined || !(await check_token(req.query?.apikey))) {
     req_amount = 1;
   } else if(Number.isNaN(req_amount) || req_amount > MAX_AMOUNT) { // check if the requested amount is higher than max and set to max if needed.
     req_amount = MAX_AMOUNT;
@@ -140,8 +144,10 @@ app.post('/user', async(req, res) => {
     }
 
     res.status(200);
+    res.end();
   } else {
     res.status(401);
+    res.end();
   }
 });
 
@@ -178,6 +184,7 @@ app.post('/signup', async(req, res) => {
     req.session.user = {
       id: Number(auth[0].id), 
       username: String(auth[0].username),
+      apikey: '',
     }
     req.session.save();
 
@@ -207,6 +214,7 @@ app.post('/login', async(req, res) => {
   req.session.user = {
     id: Number(auth[0]?.id), 
     username: String(auth[0]?.username),
+    apikey: '',
   };
 
   req.session.save();
@@ -215,8 +223,104 @@ app.post('/login', async(req, res) => {
   res.json({login: true, status: 200, username: req.session.user?.username, id: req.session.user?.username});
 });
 
-app.post('/checkbalance', (req, res) => {
+app.post('/genapikey', async(req, res) => {
+  const username: string | undefined = req.session.user?.username;
+  if(username === undefined) {
+    res.status(401);
+    res.end();
+    return;
+  }
 
+  const user = await sql`
+    SELECT * FROM users WHERE (username) = ${username}
+  `;
+  
+  if(!user[0].api_access) {
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  const key = crypto.randomBytes(32).toString('hex');
+  
+  await sql`
+    INSERT INTO apikeys (key, uid) 
+    VALUES(
+      ${key},
+      ${String(req.session.user?.id)}
+    )
+  `;
+
+  req.session.user.apikey = key;
+  req.session.save();
+  console.log('hey');
+
+  res.end();
+});
+
+app.get('/apikey', async(req, res) => {
+  const username: string | undefined = req.session.user?.username;
+  if(username === undefined) {
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  const check = await sql`
+    SELECT * FROM users JOIN apikeys ON apikeys.uid = users.id WHERE username = ${username}
+  `;
+
+  if(check.length < 1) {
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  res.json({ key: check[0].key });
+});
+
+app.post('/checkbalance', async(req, res) => {
+  if(req.session.user?.username === undefined) {
+    res.status(401);
+    res.end();
+    return;
+  }
+
+  const btc_amount: number = await usd_to_btc(10.00);
+  if(btc_amount === -1) {
+    res.status(500);
+    res.send('Problem grabbing current Bitcoin price.');
+    res.end();
+    return;
+  }
+  
+  const user = await sql`
+    SELECT * FROM users WHERE (username) = ${req.session.user?.username}
+  `;
+  const user_wallet: string = String(user[0].wallet).split(':')[0];
+  console.log(user_wallet);
+
+  const balance: number = await check_balance(user_wallet);
+  if(balance === -1) {
+    res.status(500);
+    res.send('Problem grabbing your wallet balance.');
+    res.end();
+    return;
+  }
+
+  if(balance >= btc_amount) {
+    await sql`
+      UPDATE users SET (api_access) = true WHERE (id) = ${req.session.user?.id}
+    `;
+
+    res.status(200);
+    res.json({ api_access: true, btc_amount, user_wallet, balance });
+    res.end();
+  } else {
+    res.status(200);
+    res.json({ api_access: false, btc_amount, user_wallet, balance });
+    res.end();
+  }
 });
 
 app.listen(8080, () => {

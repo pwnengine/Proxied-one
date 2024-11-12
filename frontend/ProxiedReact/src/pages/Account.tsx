@@ -5,11 +5,13 @@ import { useWindowSize } from '../hooks/useWindowSize'
 import SectionPoint from '../components/SectionPoint'
 import { useEffect, useRef, useState} from 'react'
 import axios from 'axios'
+import Code from '../components/Code'
 import Input from '../components/Input'
 import Button from '../components/Button'
 import InfoPopup from '../components/InfoPopup'
 import { useNavigate } from 'react-router-dom'
 import { i_user, useUserQuery } from '../hooks/useUserQuery'
+import ReactLoading from 'react-loading'
 
 const Container = styled.div`
   .nav {
@@ -61,8 +63,9 @@ const Container = styled.div`
 
 `;
 
-const Account = () => {
+type bitcoin_payments = { api_access: boolean, btc_amount: number, user_wallet: string, balance: number };  
 
+const Account = () => {
   const { x } = useWindowSize();
 
   const account_ref = useRef<HTMLDivElement>(null);
@@ -73,9 +76,24 @@ const Account = () => {
   const username_input = useRef<string>('username');
   const password_input = useRef<string>('password');
 
-  const api_key_input = useRef<string>('api key');
-
   const [show_bitcoin_wallet_popup, set_show_bitcoin_wallet_popup] = useState<boolean>(false);
+  const [show_api_error_popup, set_show_api_error_popup] = useState<boolean>(false);
+  const [show_payment_popup, set_show_payment_popup] = useState<boolean>(false);
+  const [payment_message, set_payment_message] = useState<string>('');
+
+  const [btc_option, set_btc_option] = useState<bitcoin_payments>();
+
+  const gen_apikey = () => {
+    axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/genapikey`, {}, { withCredentials: true }).then((resp) => {
+      if(resp.status !== 401) {
+        refetch();
+      }
+    }).catch(() => {
+      set_show_api_error_popup(true);
+    });
+    
+    
+  };
 
   const update_user_details = () => {
     axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/user`, { new_username: username_input.current, new_password: password_input.current }, {withCredentials: true});
@@ -96,17 +114,30 @@ const Account = () => {
       console.error('not authenticated.');
     }
   }, [user, nav, loading]);
-  /*
-  
 
-  console.log(data);
-*/
   return (
     <Container>
 
       <div className={ x > 600 ? (x < 1250 ? 'nav small-nav' : 'nav') : ('nav nav-smaller')}>
         <AccountNav nav_array={ [ account_ref, apikey_ref, referrals_ref, billing_ref ] } />
       </div>
+
+      { loading && 
+        <div className={ x > 600 ? (x < 1250 ? 'page small-page' : 'page') : ('page page-smaller')}>
+          <MainSection name="">
+            
+              <div style={{ height: '35rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ margin: '3rem', width: '80px' }}>
+                <ReactLoading type="spinningBubbles" color="black" />
+                </div>
+              </div>
+
+            
+          </MainSection>
+        </div>
+
+      }
+
       { !loading &&
       <div className={ x > 600 ? (x < 1250 ? 'page small-page' : 'page') : ('page page-smaller')}>
         <MainSection name={'Settings'}>
@@ -120,8 +151,8 @@ const Account = () => {
               
             <SectionPoint title="API Key">
               <div ref={apikey_ref} className="page-point">
-                <Input name="API Key" value={api_key_input} editable={false} />
-                <Button name="Generate" />
+                <Input name="API Key" value={{current: String(user?.apikey)}} editable={false} />
+                <Button name="Generate" onclick={gen_apikey} />
               </div>
             </SectionPoint>
 
@@ -139,7 +170,16 @@ const Account = () => {
                   The USD price is $10 for lifetime api use.
                   
                 </div>
-                <Button name="Pay with Bitcoin" onclick={() => set_show_bitcoin_wallet_popup(true)} />
+                <Button name="Pay with Bitcoin" onclick={async() => {
+                    const res = await axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/checkbalance`, {}, { withCredentials: true });//.then((res: AxiosResponse<bitcoin_payments>) => {
+                    if(res.status === 500) {
+                      console.log(res.data);
+                    } else {
+                      set_btc_option(res.data as bitcoin_payments);
+                      set_show_bitcoin_wallet_popup(true);
+                    }
+                      
+                  }} />
               </div>
             </SectionPoint>
         </MainSection>
@@ -147,9 +187,47 @@ const Account = () => {
       
         
       { show_bitcoin_wallet_popup && 
-        <InfoPopup width="500px" height="500px" title="Bitcoin Wallet" on_close={() => set_show_bitcoin_wallet_popup(false)}> 
+        <InfoPopup width="500px" height="450px" title="Bitcoin Wallet" on_close={() => set_show_bitcoin_wallet_popup(false)}> 
           <div>
-            A bitcoin address has been create for this transaction. <br /> Please Send exactly 
+            <p>The wallet address below is your account's wallet...</p>
+            <p>Send exactly <span style={{ backgroundColor: '#dbd0d0', borderRadius: '5px', padding: '3px' }}>{btc_option?.btc_amount}</span> btc. <br /> ($10 dollars).</p>
+            <Code language="curl" code={String(btc_option?.user_wallet)} title="" />
+            Current wallet balance: {btc_option?.balance}
+            <br /> Click 'check blockchain' button after transaction has been verified on blockchain.
+            <div style={{ margin: '50px' }}>
+              <Button name="Check blockchain" styled={{ width: '100%' }} onclick={async() => {
+                const res = await axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/checkbalance`, {}, { withCredentials: true });
+                if(res.status === 200) {
+                  const data: bitcoin_payments = res.data;
+                  set_btc_option(data);
+                  if(data.api_access === true) {
+                    set_payment_message('Success! You now have api access.');
+                  } else {
+                    set_payment_message('Payment not verified yet, please wait a little longer.');
+                  }
+
+                  set_show_payment_popup(true);
+                }
+              }} />
+            </div>
+          </div>
+
+          
+        </InfoPopup>
+      }
+
+      { show_payment_popup &&
+        <InfoPopup width="280px" height="200px" title="Check payment" on_close={() => set_show_payment_popup(false)} >
+          <div>
+            {payment_message}
+          </div>
+        </InfoPopup>
+      }
+
+      { show_api_error_popup && 
+        <InfoPopup width="280px" height="200px" title="API Error" on_close={() => set_show_api_error_popup(false)} >
+          <div>
+            You do not have api access.
           </div>
         </InfoPopup>
       }

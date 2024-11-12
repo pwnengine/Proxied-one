@@ -18,11 +18,15 @@ const Container = styled.div`
 
 `;
 
+interface i_reg_string {
+  current: string;
+}
+
 interface props {
   name: string;
   placeholder?: string;
   styled?: CSSProperties;
-  value: React.MutableRefObject<string>;
+  value: React.MutableRefObject<string> | i_reg_string;
   editable: boolean;
 }
 
