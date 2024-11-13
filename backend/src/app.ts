@@ -326,3 +326,5 @@ app.post('/checkbalance', async(req, res) => {
 app.listen(8080, () => {
   console.log('backend running on port 8080');
 });
+
+export default app;

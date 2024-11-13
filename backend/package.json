@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dev": "tsc && nodemon dist/app.js"
+    "dev": "tsc && nodemon dist/app.js",
+    "vercel": "echo running"
   },
   "keywords": [],
   "author": "",
