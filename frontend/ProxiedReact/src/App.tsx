@@ -6,6 +6,8 @@ import Account from './pages/Account'
 import Login from './pages/Login'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Register from './pages/Register'
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 function App() {
   const client: QueryClient = new QueryClient({
@@ -18,6 +20,8 @@ function App() {
 
   return (
     <QueryClientProvider client={client}>
+    <Analytics />
+    <SpeedInsights />
     <BrowserRouter>
       <Navbar />
       <Routes>
