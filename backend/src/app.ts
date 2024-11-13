@@ -45,16 +45,11 @@ await sql`
 `;
 
 await sql`
-  CREATE TABLE IF NOT EXISTS "session" (
-    "sid" varchar NOT NULL COLLATE "default",
-    "sess" json NOT NULL,
-    "expire" timestamp(6) NOT NULL
+ CREATE TABLE IF NOT EXISTS public.session (
+  sid character varying PRIMARY KEY NOT NULL,
+  sess json NOT NULL,
+  expire timestamp(6) without time zone NOT NULL
   )
-  WITH (OIDS=FALSE);
-
-  ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
-
-  CREATE INDEX "IDX_session_expire" ON "session" ("expire");
 `;
 
 const MAX_AMOUNT: number = 20;
