@@ -59,13 +59,12 @@ const app = express();
 
 app.use(express.json());
 
-/*
 app.use((req, res, next) => {
   if(req.method === 'GET') { // anyone can make simple requests to the api
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
   } else {                     // change this later so that only the website can make preflight requests...
-    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     res.setHeader('Access-Control-Allow-Methods', 'POST');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -80,22 +79,12 @@ app.use((req, res, next) => {
 
   next();
 });
-*/
 
-app.use((req, res, next) => {
-    if(req.method === 'OPTIONS') {
-      res.status(200);
-      res.statusMessage = 'ok';
-      res.end();
-      next();
-    }
-})
-
-app.use(cors({
-  orgin: process.env.FRONTEND_URL,
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  credentials: true,
-}));
+//app.use(cors({
+//  orgin: process.env.FRONTEND_URL,
+//  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+//  credentials: true,
+//}));
 
 const pg_store = genFunc(session);
 const session_store = new pg_store({
