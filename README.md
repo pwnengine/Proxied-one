@@ -52,11 +52,11 @@ The addition query parameters for custom scraping are:
   can be either ```http``` ```https``` ```socks4``` ```socks5```
   if not set all types will be scraped
 - amount
-  specify the max amount of proxies to scrape
+  specify the max amount of proxies to scrape, max ```20```
 - format
   the format you want the server to response with ```text``` or ```json```, but JSON is the default
 - apikey
-  Self hosting, so just put something random it doesn't matter.
+  Self hosting, so just put something random it doesn't matter
 ### If an apikey isn't specified the server will only scrape a maximum of 1 proxy! Set anything to stop that!
 
 
