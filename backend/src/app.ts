@@ -323,6 +323,10 @@ app.post('/checkbalance', async(req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({ hello: 'world' });
+});
+
 app.listen(8080, () => {
   console.log('backend running on port 8080');
 });
