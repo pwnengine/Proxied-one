@@ -105,7 +105,7 @@ const Account = () => {
     });
   };
 
-  const { user, error, loading, refetch } = useUserQuery(fetch_user);
+  const { user, loading, refetch } = useUserQuery(fetch_user);
 
   const nav = useNavigate();
   useEffect(() => {
