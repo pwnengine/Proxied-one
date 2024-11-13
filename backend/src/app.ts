@@ -84,11 +84,6 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
     if(req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app/login');
-      res.setHeader('Access-Control-Allow-Methods', 'POST');
-      res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-
       res.status(200);
       res.statusMessage = 'ok';
       res.end();
