@@ -25,10 +25,10 @@ you'll get a response with a proxy in JSON format by default.
 
 The sources availble:
 1. ```freeproxy.world```
-Scrapes from [http](https://www.freeproxy.world/)
+Scrapes from [freeproxy.world](https://www.freeproxy.world/)
 
-2. hide.mn
-Scrapes from [http](//hide.mn/en/)
+2. ```hide.mn```
+Scrapes from [hide.mn](https://hide.mn/en/)
 
 4. custom
 Requires addition query parameters, but allows you to scrapes from any site that contains proxy data inside of it's HTML body in a ````<tr>```` -> ```<td>``` tag(s)
@@ -46,6 +46,18 @@ The addition query parameters for custom scraping are:
   The offset between the ip address <td> tag and proxy type (i.e. HTTP) ```<td>``` tag.
 ### Example: ```http://localhost:8080/get-proxies?source=custom&url=https://hide.mn/en/proxy-list/&first_proxy_position=7&next_proxy_position_offset=7&port_offset=1&type_offset=4```
 ### Check the image above to see how the offsets translate to the html body code.
+
+## More options
+- type
+  can be either ```http``` ```https``` ```socks4``` ```socks5```
+  if not set all types will be scraped
+- amount
+  specify the max amount of proxies to scrape
+- format
+  the format you want the server to response with ```text``` or ```json```, but JSON is the default
+- apikey
+  Self hosting, so just put something random it doesn't matter.
+### If an apikey isn't specified the server will only scrape a maximum of 1 proxy! Set anything to stop that!
 
 
 
