@@ -82,6 +82,11 @@ app.use((req, res, next) => {
 });
 */
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
 app.use(cors());
 
 const pg_store = genFunc(session);
