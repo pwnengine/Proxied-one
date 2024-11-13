@@ -84,7 +84,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
     if(req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
+      res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'POST');
       res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
