@@ -85,6 +85,7 @@ app.use((req, res, next) => {
 
 app.use(cors({
   orgin: process.env.FRONTEND_URL,
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
   credentials: true,
 }));
 
