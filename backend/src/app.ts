@@ -1,5 +1,6 @@
 import express from 'express'
 import session from 'express-session'
+import cors from 'cors'
 import get_proxies, { i_custom_data } from './scraper.js'
 import { check_token } from './auth.js'
 import { check_proxy } from './check_proxy.js'
@@ -58,6 +59,7 @@ const app = express();
 
 app.use(express.json());
 
+/*
 app.use((req, res, next) => {
   if(req.method === 'GET') { // anyone can make simple requests to the api
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -78,6 +80,9 @@ app.use((req, res, next) => {
 
   next();
 });
+*/
+
+app.use(cors());
 
 const pg_store = genFunc(session);
 const session_store = new pg_store({
