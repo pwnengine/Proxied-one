@@ -73,7 +73,7 @@ app.use((req, res, next) => {
 
 const pg_store = genFunc(session);
 const session_store = new pg_store({
-  conString: `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_ADDRESS}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+  conString: process.env.POSTGRES_URL,
 });
 
 app.use(session({
