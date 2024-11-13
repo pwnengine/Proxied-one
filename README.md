@@ -33,6 +33,7 @@ Scrapes from [hide.mn](https://hide.mn/en/)
 4. custom
 Requires addition query parameters, but allows you to scrapes from any site that contains proxy data inside of it's HTML body in a ````<tr>```` -> ```<td>``` tag(s)
 ![screenshots-11](https://github.com/user-attachments/assets/8675d9fc-dc80-41df-8768-0ae50e8d3a9b)
+
 The addition query parameters for custom scraping are:
 - ```url```
   The full url of the target you wish to scrape.
