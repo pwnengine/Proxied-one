@@ -61,21 +61,16 @@ app.set('trust proxy', 1);
 app.use(express.json());
 
 app.use((req, res, next) => {
-  if(req.method === 'GET') { // anyone can make simple requests to the api
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-  } else {                     // change this later so that only the website can make preflight requests...
-    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-    if(req.method === 'OPTIONS') {
-      res.status(200);
-      res.statusMessage = 'ok';
-      res.end();
-      return;
-    }
+  if(req.method === 'OPTIONS') {
+    res.status(200);
+    res.statusMessage = 'ok';
+    res.end();
+    return;
   }
 
   next();
