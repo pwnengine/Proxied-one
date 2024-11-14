@@ -60,7 +60,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   if(req.method === 'GET') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    //res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
   } else if(req.method === 'POST') {
     res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
