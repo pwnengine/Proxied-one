@@ -63,10 +63,10 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
   } else if(req.method === 'POST') {
-    if(process.env.VERCEL === 'true') {
-      res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
-    } else {
+    if(process.env.VERCEL === 'false') {
       res.setHeader('Access-Control-Allow-Origin', '*');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
     }
     
     res.setHeader('Access-Control-Allow-Methods', 'POST');
