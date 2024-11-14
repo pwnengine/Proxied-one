@@ -59,19 +59,10 @@ app.set('trust proxy', 1);
 app.use(express.json());
 
 app.use((req, res, next) => {
-  if(req.method === 'GET') {
-    //res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-  } else if(req.method === 'POST') {
-    res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
-    if(process.env.VERCEL === 'false') {
-      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-    }
-    
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
+  res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   if(req.method === 'OPTIONS') {
     res.status(200);
