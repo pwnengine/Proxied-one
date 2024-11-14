@@ -97,8 +97,8 @@ app.use(session({
   saveUninitialized: true,
   store: session_store,
   cookie: {
-    secure: true,
-    sameSite: 'none',
+    secure: false,
+    //sameSite: 'none',
     
   }
  })
