@@ -1,10 +1,8 @@
 import express from 'express'
 import session from 'express-session'
-import cors from 'cors'
 import get_proxies, { i_custom_data } from './scraper.js'
 import { check_token } from './auth.js'
 import { check_proxy } from './check_proxy.js'
-import bitcore from 'bitcore-lib'
 import { check_balance, create_wallet, i_wallet, usd_to_btc } from './bitcoin/wallet.js'
 import sql from './db.js'
 import dotenv from 'dotenv'
@@ -61,10 +59,20 @@ app.set('trust proxy', 1);
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if(req.method === 'GET') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+  } else if(req.method === 'POST') {
+    if(process.env.VERCEL === 'true') {
+      res.setHeader('Access-Control-Allow-Origin', 'https://proxied-one.vercel.app');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
 
   if(req.method === 'OPTIONS') {
     res.status(200);
@@ -75,12 +83,6 @@ app.use((req, res, next) => {
 
   next();
 });
-
-//app.use(cors({
-//  orgin: process.env.FRONTEND_URL,
-//  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-//  credentials: true,
-//}));
 
 const pg_store = genFunc(session);
 const session_store = new pg_store({
