@@ -98,7 +98,7 @@ app.use(session({
   store: session_store,
   cookie: {
     secure: false,
-    //sameSite: 'none',
+    sameSite: 'none',
     
   }
  })
