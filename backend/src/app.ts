@@ -148,7 +148,7 @@ app.post('/adminupdate', async(req, res) => {
   }
 
   const user = await sql`
-    SELECT * FROM users WHERE (username) = ${user_to_update}
+    SELECT * FROM users WHERE username = ${user_to_update}
   `;
 
   if(user.length < 1) {
@@ -159,7 +159,7 @@ app.post('/adminupdate', async(req, res) => {
   }
 
   await sql`
-    UPDATE users SET (api_access) = true WHERE (id) = ${user[0].id}
+    UPDATE users SET api_access = true WHERE id = ${user[0].id}
   `;
 
   res.status(200);
