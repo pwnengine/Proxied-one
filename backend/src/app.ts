@@ -131,6 +131,40 @@ app.get('/get-proxies', async(req, res) => {
   }
 });
 
+app.post('/adminupdate', async(req, res) => {
+  if(req.session.user?.username !== 'admin') {
+    res.status(401);
+    res.json({ error: `not admin` });
+    res.end();
+    return;
+  }
+
+  const user_to_update: string | undefined = req.body?.admin_update_user ?? undefined;
+  if(user_to_update === undefined) {
+    res.status(400);
+    res.json({ error: `no user sent` });
+    res.end();
+    return;
+  }
+
+  const user = await sql`
+    SELECT * FROM users WHERE (username) = ${user_to_update}
+  `;
+
+  if(user.length < 1) {
+    res.status(400);
+    res.json({ error: `no user with requested username: ${user_to_update}` });
+    res.end();
+    return;
+  }
+
+  await sql`
+    UPDATE users SET (api_access) = true WHERE (id) = ${user[0].id}
+  `;
+
+  res.status(200);
+});
+
 app.post('/user', async(req, res) => {
   if(req.session.user?.id && req.session.user?.username) {
     console.log(req.session?.user);

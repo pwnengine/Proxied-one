@@ -76,6 +76,8 @@ const Account = () => {
   const username_input = useRef<string>('username');
   const password_input = useRef<string>('password');
 
+  const admin_update_user = useRef<string>('username');
+
   const [show_bitcoin_wallet_popup, set_show_bitcoin_wallet_popup] = useState<boolean>(false);
   const [show_api_error_popup, set_show_api_error_popup] = useState<boolean>(false);
   const [show_payment_popup, set_show_payment_popup] = useState<boolean>(false);
@@ -182,6 +184,15 @@ const Account = () => {
                   }} />
               </div>
             </SectionPoint>
+
+            {(user?.username === 'admin') && <SectionPoint title="Admin">
+              <div className="page-point">
+                  <Input name="Account to give api access to:" editable={true} placeholder="username" value={admin_update_user} />
+                  <Button name="Submit" onclick={() => {
+                    axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/adminupdate`, { admin_update_user }, { withCredentials: true }).then(() => console.log('success')).catch((err) => console.error(err));
+                  }} />
+              </div>
+            </SectionPoint>}
         </MainSection>
       </div>}
       
