@@ -189,7 +189,7 @@ const Account = () => {
               <div className="page-point">
                   <Input name="Account to give api access to:" editable={true} placeholder="username" value={admin_update_user} />
                   <Button name="Submit" onclick={() => {
-                    axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/adminupdate`, { admin_update_user }, { withCredentials: true }).then(() => console.log('success')).catch((err) => console.error(err));
+                    axios.post(`${import.meta.env.VITE_PUBLIC_BACKEND_URL}/adminupdate`, { admin_update_user: admin_update_user.current }, { withCredentials: true }).then(() => console.log('success')).catch((err) => console.error(err));
                   }} />
               </div>
             </SectionPoint>}
