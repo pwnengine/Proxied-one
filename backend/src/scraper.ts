@@ -93,6 +93,10 @@ const get_proxies: (origin: string, ip: string, amount: number, type: string, so
       proxies = await scrape(`https://www.${source}/`, amount, type, 0, 8, 1, 5);
       break;
 
+    case 'ditatompel.com':
+      proxies = await scrape(`https://www.${source}/proxy/`, amount, type, 0, 6, 0, 1);
+      break;
+
     case 'hide.mn':
       proxies = await scrape(`https://${source}/en/proxy-list/`, amount, type, 7, 7, 1, 4);
       break;
