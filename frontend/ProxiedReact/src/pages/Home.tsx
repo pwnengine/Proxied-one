@@ -73,7 +73,7 @@ const Home = () => {
 
         <div className="code-container">
         <MainSection name="Try it youself!">
-        <Code title="As easy as a simple curl command" language="curl" code="curl https://api.proxied.one?format=text&amount=1&type=http" />
+        <Code title="As easy as a simple curl command" language="curl" code="curl https://proxied-one-api.vercel.app/get-proxies?source=hide.mn" />
         </MainSection>
         </div>
 

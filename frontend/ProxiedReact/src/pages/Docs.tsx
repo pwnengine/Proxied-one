@@ -23,7 +23,7 @@ const Docs = () => {
           <div>
             <p>
             With the Proxied API you can grab proxies programmatically with http requests.
-            Simply make a request with your language of choice to: <span style={ { display: 'block', fontWeight: '600' } }>https://api.proxied.one/get-proxies</span> to 
+            Simply make a request with your language of choice to: <span style={ { display: 'block', fontWeight: '600' } }>{'https://proxied-one-api.vercel.app/get-proxies?source=<source of your choice>'}</span> to 
             grab some proxies. You can even give query parameters to specify the type of proxies you want.
             </p>
             <ul>
@@ -32,6 +32,20 @@ const Docs = () => {
             <li>Try to scape a certain amount</li>
             </ul>
           </div>
+        </SectionPoint>
+
+        <SectionPoint title={'Sources'}>
+          <div>
+            You must specify a source when querying the api. There are preset sources, but you can specify a custom source by passing 'custom' and some additional query parameters.<br /> The preset sources available are:
+            <ul>
+            <li>ditatompel.com</li>
+            <li>freeproxy.world</li>
+            <li>hide.mn</li>
+            </ul>
+
+            Custom is described in the github docs: <span style={{ fontWeight: 'bold' }}>https://github.com/pwnengine/Proxied-one/tree/SelfHost</span>
+          </div>
+
         </SectionPoint>
       
         <SectionPoint title={'API Keys'}>
@@ -55,11 +69,11 @@ const Docs = () => {
             It can be as simple as a curl request.
             </p>
           </div>
-          <Code language="curl" code="curl https://api.proxied.one/get-proxies?format=text&amount=1&type=http" title="" />
+          <Code language="curl" code="curl https://proxied-one-api.vercel.app/get-proxies?source=hide.mn&format=text&amount=1&type=http" title="" />
         </SectionPoint>
 
         <SectionPoint title={'Or Javascript'}>
-          <Code language="javascript" code="fetch('https://api.proxied.one/get-proxies?format=json&type=http')" title="" />
+          <Code language="javascript" code="fetch('https://proxied-one-api.vercel.app/get-proxies?hide.mn&format=json&type=http')" title="" />
         </SectionPoint>
 
         <SectionPoint title={'Customizing Your Query'}>
@@ -94,7 +108,7 @@ const Docs = () => {
 
           <Code title="Python Request using every query parameter" language="python" 
             code="import urllib.request
-contents = urllib.request.urlopen('https://api.proxied.one/get-proxies?apikey=myapikey&format=text&amount=3&type=all').read()
+contents = urllib.request.urlopen('https://proxied-one-api.vercel.app/get-proxies?source=hide.mn&apikey=myapikey&format=text&amount=3&type=all').read()
 print(contents)"
             />
         </SectionPoint>
